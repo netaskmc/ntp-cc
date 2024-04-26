@@ -1,6 +1,3 @@
---[[!ntp_forward:pastebin:51K15aQ4]]--
--- The comment above tells NTP to pull the script from pastebin instead. Fallback:
-
 args = {...}
 monitor = peripheral.find("monitor")
 digitColor = "0"
