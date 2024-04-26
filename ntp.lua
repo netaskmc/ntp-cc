@@ -7,8 +7,9 @@ local function pullFile(path)
     local response = http.get(url)
     if response == nil then return nil end
     if response.getResponseCode() ~= 200 then return nil end
-    print("...pulling "..path)
-    return response.readAll()
+    write("pulling "..path.."...")
+    local all = response.readAll()
+    print("done")
 end
 
 local function pullDir(path, ignore)
@@ -71,15 +72,23 @@ local function installPackage(package, files)
     if package == nil then error("package ".. name .." not found") end
     print("Installing "..package.name.."...")
     local installDir = ""
-    if package.type == "program" then
-        installDir = "/rom/programs/"
-    elseif package.type == "library" or package.type == "lib" then
-        installDir = "/rom/modules/main/"
-    end
+    -- if package.type == "program" then
+    --     installDir = "/rom/programs/"
+    -- elseif package.type == "library" or package.type == "lib" then
+    --     installDir = "/rom/modules/main/"
+    -- end
     for n, f in pairs(files) do
         local file = fs.open(installDir..n, "w")
         file.write(f)
         file.close()
+    end
+    -- install dependencies
+    if package.dependencies ~= nil then
+        print("Installing "..#package.dependencies.." dependencies...")
+        for i, dep in pairs(package.dependencies) do
+            local depPackage, depFiles = resolvePackage(dep, true)
+            installPackage(depPackage, depFiles)
+        end
     end
     return package
 end
