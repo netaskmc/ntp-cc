@@ -77,7 +77,7 @@ local function installPackage(package, files)
         installDir = "/rom/modules/main/"
     end
     for n, f in pairs(files) do
-        local file = fs.open(n, "w")
+        local file = fs.open(installDir..n, "w")
         file.write(f)
         file.close()
     end
