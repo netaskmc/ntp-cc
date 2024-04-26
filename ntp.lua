@@ -7,9 +7,11 @@ local function pullFile(path)
     local response = http.get(url)
     if response == nil then return nil end
     if response.getResponseCode() ~= 200 then return nil end
+    term.setTextColor(colors.gray)
     write("pulling "..path.."...")
     local all = response.readAll()
-    print("done")
+    term.setTextColor(colors.green)
+    print("ok")
     return all
 end
 
@@ -71,8 +73,9 @@ end
 
 local function installPackage(package, files)
     if package == nil then error("package ".. name .." not found") end
+    term.setTextColor(colors.cyan)
     print("Installing "..package.name.."...")
-    local installDir = ""
+    local installDir = "/ntp/"
     -- if package.type == "program" then
     --     installDir = "/rom/programs/"
     -- elseif package.type == "library" or package.type == "lib" then
@@ -85,6 +88,7 @@ local function installPackage(package, files)
     end
     -- install dependencies
     if package.dependencies ~= nil then
+        term.setTextColor(colors.orange)
         print("Installing "..#package.dependencies.." dependencies...")
         for i, dep in pairs(package.dependencies) do
             local depPackage, depFiles = resolvePackage(dep, true)
@@ -94,12 +98,27 @@ local function installPackage(package, files)
     return package
 end
 
+local function addNtpPath()
+    -- /dir1/:/dir2/:/dir3/
+    local path = shell.path()
+    -- check if ntp is already in path
+    if path:find("/ntp/") == nil then
+        path = path..":/ntp/"
+        shell.setPath(path)
+        term.setTextColor(colors.purple)
+        print("Added ntp to path")
+    end
+end
+
 if args[1] == nil then error("Usage: ntp [install|run] <package>") end
 
 if args[1] == "install" or args[1] == "i" then
     if args[2] == nil then error("Usage: ntp ".. args[1] .." <package>") end
     local package, files = resolvePackage(args[2], true)
     installPackage(package, files)
+    term.setTextColor(colors.lime)
+    print("Installed "..package.name.."!")
+    addNtpPath()
 end
 
 if args[1] == "run" or args[1] == "x" then
@@ -110,9 +129,11 @@ if args[1] == "run" or args[1] == "x" then
 
     local path = shell.resolveProgram(args[2])
     if path == nil then
+        term.setTextColor(colors.orange)
         print("Package "..args[2].." not found, installing...")
         local package, files = resolvePackage(args[2], true)
         installPackage(package, files)
+        addNtpPath()
         path = shell.resolveProgram(args[2])
     end
 end
