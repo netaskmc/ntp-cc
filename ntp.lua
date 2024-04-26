@@ -15,6 +15,16 @@ local function pullFile(path)
     return all
 end
 
+function table_contains(tbl, x)
+    found = false
+    for _, v in pairs(tbl) do
+        if v == x then 
+            found = true 
+        end
+    end
+    return found
+end
+
 local function pullDir(path, ignore)
     local url = repo:gsub("github.com", "api.github.com/repos").."/contents/"..path
     local response = http.get(url)
@@ -22,7 +32,7 @@ local function pullDir(path, ignore)
     local files = textutils.unserialiseJSON(response.readAll())
     local out = {}
     for i, file in pairs(files) do
-        if not table.contains(ignore, file.name) then 
+        if table_contains(ignore, file.name) == false then 
             if file.type == "file" then
                 out[file.path] = pullFile(file.path)
                 if out[file.path] == nil then error("failed to pull "..file.path) end
@@ -56,7 +66,7 @@ local function resolvePackage(name, pull)
 
         packageMeta = loadstring(metaStr)()
         if packageMeta.ignore == nil then packageMeta.ignore = {} end
-        packageMeta.ignore:insert("ntpackage.lua")
+        table.insert(packageMeta.ignore, "ntpackage.lua")
 
         if pull then
             local dir = pullDir(name, packageMeta.ignore)
