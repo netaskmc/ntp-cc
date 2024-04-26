@@ -10,6 +10,7 @@ local function pullFile(path)
     write("pulling "..path.."...")
     local all = response.readAll()
     print("done")
+    return all
 end
 
 local function pullDir(path, ignore)
